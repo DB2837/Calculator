@@ -80,11 +80,32 @@ operatorButtons.forEach((button) => {
     ) {
       currentNumber.textContent += "-";
     } else if (
+      button.dataset.operator == "-" &&
+      currentNumber.textContent == "-"
+    ) {
+      return;
+    } else if (
       currentNumber.textContent != "" &&
+      currentNumber.textContent != "-" &&
       previusNumber.textContent != "" &&
+      !currentNumber.textContent.includes("^") &&
       button.dataset.operator == "^"
     ) {
       currentNumber.textContent += "^";
+    } else if (
+      currentNumber.textContent == "-" &&
+      previusNumber.textContent != "" &&
+      !currentNumber.textContent.includes("^") &&
+      button.dataset.operator == "^"
+    ) {
+      return;
+    } else if (
+      currentNumber.textContent != "" &&
+      previusNumber.textContent != "" &&
+      currentNumber.textContent.includes("^") &&
+      button.dataset.operator == "^"
+    ) {
+      return;
     } else if (
       currentNumber.textContent != "" &&
       previusNumber.textContent != ""
