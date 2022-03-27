@@ -1,193 +1,140 @@
-const clearBtn = document.querySelector("[data-value='clear']");
-const deleteBtn = document.querySelector("[data-value='delete']");
-const powBtn = document.querySelector("[data-value='^']");
-const factorialBtn = document.querySelector("[data-value='!']");
-const sevenBtn = document.querySelector("[data-value='7']");
-const eightBtn = document.querySelector("[data-value='8']");
-const nineBtn = document.querySelector("[data-value='9']");
-const divideBtn = document.querySelector("[data-value='÷']");
-const fourBtn = document.querySelector("[data-value='4']");
-const fiveBtn = document.querySelector("[data-value='5']");
-const sixBtn = document.querySelector("[data-value='6']");
-const multiplyBtn = document.querySelector("[data-value='x']");
-const oneBtn = document.querySelector("[data-value='1']");
-const twoBtn = document.querySelector("[data-value='2']");
-const threeBtn = document.querySelector("[data-value='3']");
-const minusBtn = document.querySelector("[data-value='-']");
-const zeroBtn = document.querySelector("[data-value='0']");
-const pointBtn = document.querySelector("[data-value='.']");
-const equalBtn = document.querySelector("[data-value='=']");
-const plusBtn = document.querySelector("[data-value='+']");
-const calculatorDisplay = document.querySelector("#screen");
-const calculatorDisplayTop = document.querySelector("#screen-top");
-const calculatorDisplayBottom = document.querySelector("#screen-bottom");
+const clearBtn = document.querySelector("[data-clear]");
+const deleteBtn = document.querySelector("[data-delete]");
+const equalBtn = document.querySelector("[data-equal]");
+const numberButtons = document.querySelectorAll("[data-number]");
+const operatorButtons = document.querySelectorAll("[data-operator]");
+const previusNumber = document.querySelector("[data-previus-number]");
+const currentNumber = document.querySelector("[data-current-number]");
 
-let displayTopExpression = calculatorDisplayTop.textContent;
-let displayBottomExpression = calculatorDisplayBottom.textContent;
-
-const regPattern = /(^\d{1,6}\D\d{1,6}$)/;
-let isValid = false;
+currentNumber.textContent = "";
+previusNumber.textContent = "";
 
 clearBtn.addEventListener("click", () => {
   clearScreen();
 });
 
-factorialBtn.addEventListener("click", () => {
-  console.log(factorial(a));
+deleteBtn.addEventListener("click", () => {
+  removeDigit();
 });
 
-powBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += `${powBtn.getAttribute("data-value")}`;
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
+function numberFilter(string) {
+  const myNumber = string.split(" ");
+  return myNumber[0];
+}
+
+function operatorFilter(string) {
+  const myOperator = string.split(" ");
+  return myOperator[1];
+}
+
+function powFilterLeft(string) {
+  const powIndex = string.indexOf("^");
+  const leftNumber = string.slice(0, powIndex);
+
+  return leftNumber;
+}
+
+function removeDigit() {
+  const newNumber = currentNumber.textContent.slice(0, -1);
+  currentNumber.textContent = newNumber;
+}
+
+function clearScreen() {
+  currentNumber.textContent = "";
+  previusNumber.textContent = "";
+}
+
+function appendNumber(num) {
+  if (num === "." && currentNumber.textContent.includes(".")) return;
+  else currentNumber.textContent += num.toString();
+}
+
+numberButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    if (
+      currentNumber.textContent != "" &&
+      previusNumber.textContent != "" &&
+      currentNumber.textContent.includes("^")
+    ) {
+      console.log(powFilterLeft(currentNumber.textContent));
+      let powResult = operate(
+        powFilterLeft(currentNumber.textContent),
+        button.dataset.number,
+        "^"
+      );
+      currentNumber.textContent = powResult;
+      return;
+    }
+    appendNumber(button.dataset.number);
+  });
 });
 
-plusBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += `${plusBtn.getAttribute("data-value")}`;
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-minusBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += `${minusBtn.getAttribute("data-value")}`;
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-multiplyBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += `${multiplyBtn.getAttribute(
-    "data-value"
-  )}`;
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-divideBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += `${divideBtn.getAttribute("data-value")}`;
-  displayTopExpression = calculatorDisplayTop.textContent;
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-pointBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += `${pointBtn.getAttribute("data-value")}`;
-  displayTopExpression = calculatorDisplayTop.textContent;
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
+operatorButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    if (button.dataset.operator == "!") {
+      let factorialResult = operate(currentNumber.textContent, 0, "!");
+      currentNumber.textContent = factorialResult;
+    } else if (
+      button.dataset.operator == "-" &&
+      currentNumber.textContent == ""
+    ) {
+      currentNumber.textContent += "-";
+    } else if (
+      currentNumber.textContent != "" &&
+      previusNumber.textContent != "" &&
+      button.dataset.operator == "^"
+    ) {
+      currentNumber.textContent += "^";
+    } else if (
+      currentNumber.textContent != "" &&
+      previusNumber.textContent != ""
+    ) {
+      let result = operate(
+        numberFilter(previusNumber.textContent),
+        currentNumber.textContent,
+        operatorFilter(previusNumber.textContent)
+      );
+      previusNumber.textContent = result + " " + `${button.dataset.operator}`;
+      currentNumber.textContent = "";
+    } else if (currentNumber.textContent != "") {
+      previusNumber.textContent =
+        currentNumber.textContent + " " + `${button.dataset.operator}`;
+      currentNumber.textContent = "";
+    }
+  });
 });
 
 equalBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += `${equalBtn.getAttribute("data-value")}`;
-  displayTopExpression = calculatorDisplayTop.textContent;
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
+  if (currentNumber.textContent == "" && previusNumber.textContent != "") {
+    return;
+  } else if (
+    currentNumber.textContent !== "" &&
+    previusNumber.textContent == ""
+  ) {
+    return;
+  }
+  let result = operate(
+    numberFilter(previusNumber.textContent),
+    currentNumber.textContent,
+    operatorFilter(previusNumber.textContent)
+  );
 
-zeroBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "0";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
+  currentNumber.textContent = result;
+  previusNumber.textContent = "";
 });
-
-oneBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "1";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-twoBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "2";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-threeBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "3";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-fourBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "4";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-fiveBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "5";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-sixBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "6";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  console.log(displayBottomExpression);
-  console.log(displayTopExpression);
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-sevenBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "7";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-eightBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "8";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-nineBtn.addEventListener("click", () => {
-  calculatorDisplayTop.textContent += "9";
-  displayTopExpression = calculatorDisplayTop.textContent;
-  isValid = regPattern.test(displayTopExpression);
-  console.log(isValid);
-});
-
-/* console.log(deleteBtn);
-console.log(clearBtn.getAttribute("data-value"));
-console.log(deleteBtn.getAttribute("data-value")); */
 
 const add = (a, b) => a + b;
-
 const subtract = (a, b) => a - b;
-
 const multiply = (a, b) => a * b;
+const divide = (a, b) => {
+  if (b == 0) {
+    return "division by 0 not allowed!";
+  } else if (a % b == 0) {
+    return a / b;
+  }
 
-const divide = (a, b) => a / b;
+  return a / b;
+};
 
 const power = (a, b) => Math.pow(a, b);
 
@@ -203,31 +150,25 @@ const factorial = function (num) {
 function operate(a, b, operator) {
   switch (operator) {
     case "+":
-      return add(a, b);
+      return Math.round(add(+a, +b) * 100) / 100;
       break;
     case "-":
-      return subtract(a, b);
+      return Math.round(subtract(+a, +b) * 100) / 100;
       break;
     case "x":
-      return multiply(a, b);
+      return Math.round(multiply(+a, +b) * 100) / 100;
       break;
     case "÷":
-      return divide(a, b);
+      return Math.round(divide(+a, +b) * 100) / 100;
       break;
     case "^":
-      return power(a, b);
+      return Math.round(power(+a, +b) * 100) / 100;
       break;
+    case "!":
+      b = 0;
+      return Math.round(factorial(+a) * 100) / 100;
+      break;
+    default:
+      return;
   }
 }
-
-function clearScreen() {
-  calculatorDisplayBottom.textContent = "";
-  displayBottomExpression = calculatorDisplayTop.textContent;
-  calculatorDisplayTop.textContent = "";
-  displayTopExpression = calculatorDisplayTop.textContent;
-}
-
-/* console.log(operate(9, 4, "^"));
-console.log(operate(12, 4, "x"));
-console.log(operate(9, 2, "÷"));
-console.log(operate(9, 55, "+")); */
