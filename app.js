@@ -71,7 +71,7 @@ numberButtons.forEach((button) => {
 
 operatorButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    if (currentNumber.textContent == ".") {
+    if (currentNumber.textContent == "." || currentNumber.textContent == "-") {
       return;
     } else if (button.dataset.operator == "!") {
       let factorialResult = operate(currentNumber.textContent, 0, "!");
